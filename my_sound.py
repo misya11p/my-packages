@@ -3,6 +3,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+import IPython.display
+import numpy as np
+import json
 
 
 def sin_wave(
@@ -97,3 +100,39 @@ def note2freq(note_number: int, A4: float = 440.) -> float:
         float: 周波数
     """
     return A4 * 2**((note_number - 69) / 12)
+
+def Audio(audio: np.ndarray, sr: int):
+    """
+    以下から引用
+    https://github.com/microsoft/vscode-jupyter/issues/1012#issuecomment-785410064
+
+    vscodeのjupyterで音声を再生する.
+
+    Use instead of IPython.display.Audio as a workaround for VS Code.
+    `audio` is an array with shape (channels, samples) or just (samples,) for mono.
+    """
+
+    if np.ndim(audio) == 1:
+        channels = [audio.tolist()]
+    else:
+        channels = audio.tolist()
+
+    return IPython.display.HTML("""
+        <script>
+            if (!window.audioContext) {
+                window.audioContext = new AudioContext();
+                window.playAudio = function(audioChannels, sr) {
+                    const buffer = audioContext.createBuffer(audioChannels.length, audioChannels[0].length, sr);
+                    for (let [channel, data] of audioChannels.entries()) {
+                        buffer.copyToChannel(Float32Array.from(data), channel);
+                    }
+            
+                    const source = audioContext.createBufferSource();
+                    source.buffer = buffer;
+                    source.connect(audioContext.destination);
+                    source.start();
+                }
+            }
+        </script>
+        <button onclick="playAudio(%s, %s)">Play</button>
+    """ % (json.dumps(channels), sr))
