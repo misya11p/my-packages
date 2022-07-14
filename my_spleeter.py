@@ -7,7 +7,7 @@ def separate(
     source: Union[str, np.ndarray],
     nstems: int,
     output_path: Optional[str] = None,
-) -> Optional[dir]:
+) -> Optional[dict]:
     """
     spleeterを使い易くした関数
 
